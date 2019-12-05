@@ -4,7 +4,7 @@ import datetime
 from threading import Thread
 import os
 from ctypes import *
-from CANLoaderController import CANLoaderController, CANLoaderFirmwareVerifyException, CANLoaderDeviceFailureException
+#from CANLoaderController import CANLoaderController, CANLoaderFirmwareVerifyException, CANLoaderDeviceFailureException
 import queue
 from CANFoxLib import CANFoxLibSkin, CANfoxException, CANfoxHardwareException
 from enum import *
