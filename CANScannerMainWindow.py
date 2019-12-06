@@ -84,6 +84,7 @@ class MainApplication(tk.Frame):
         self.frameLog.columnconfigure(0, weight=20, pad=3)
         self.frameLog.columnconfigure(1, weight=20, pad=3)
         self.frameLog.rowconfigure(0, weight=1, pad=3)
+        
 
 
         self.flLstResults = tk.Listbox(self.master, height=20, width = 100)
