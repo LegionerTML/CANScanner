@@ -4,7 +4,6 @@ import datetime
 from threading import Thread
 import os
 from ctypes import *
-#from CANLoaderController import CANLoaderController, CANLoaderFirmwareVerifyException, CANLoaderDeviceFailureException
 import queue
 from CANFoxLib import CANFoxLibSkin, CANfoxException, CANfoxHardwareException
 from enum import *
@@ -204,18 +203,19 @@ class MainApplication(tk.Frame):
         # msg2 = d_retval["canmsg"][0]
         s_data = ""
         # s_data = msg1.aby_data
+        int_id = self.shortHEX(msg1.l_id, 7)
         for y in range(0, msg1.by_len):
-            s_data += str(hex(msg1.aby_data[y])) + " "
-        flagF, id_n, num = self.data.find(msg1.l_id)
+            s_data += self.shortHEX(msg1.aby_data[y], 1) + " "
+        flagF, id_n, num = self.data.find(int_id)
         if flagF is False:
             if msg1.l_id != 0:
-                id_s = self.table.add((hex(msg1.l_id), s_data, msg1.by_len, 1))
-                row = [id_s, msg1.l_id, s_data, msg1.by_len, 1]
+                id_s = self.table.add((int_id, s_data, msg1.by_len, 1))
+                row = [id_s, int_id, s_data, msg1.by_len, 1]
                 self.data.add(row)
         else:
             self.data.update(num, s_data, msg1.by_len)
             get_row = self.data.get(num)
-            self.table.update(id_n, (hex(get_row[1]), get_row[2], get_row[3], get_row[4]))
+            self.table.update(id_n, (get_row[1], get_row[2], get_row[3], get_row[4]))
             #i += 1
 
         #self.flLstResults.delete(0, tk.END)
@@ -227,6 +227,16 @@ class MainApplication(tk.Frame):
             self.master.after_idle(self.check_my_msg)
         else:
             return
+
+    def shortHEX(self, str1, num):
+        ret = ""
+        buff = str(hex(str1))
+        if len(buff[2:]) <= num:
+            ret += "0"
+            ret += buff[2:]
+        else:
+            ret += buff[2:]
+        return ret
 
     def buttonConnectClick(self):
         self.sieca_lib = sieca132_client()
@@ -292,7 +302,7 @@ class MainApplication(tk.Frame):
 
     def buttonDisconnectClick(self):
         l_retval = self.sieca_lib.canClose(self.siecaLibHandle)
-        self.flLstResults.insert(tk.END, CANTypeDefs.ReturnValues(l_retval))
+        #self.flLstResults.insert(tk.END, CANTypeDefs.ReturnValues(l_retval))
         self.is_can_close = True
         return
 
