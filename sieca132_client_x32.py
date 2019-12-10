@@ -5,10 +5,11 @@ import copy
 
 import CANTypeDefs
 
+#ctypes.windll.kernel32.SetDllDirectoryW(None)
 
 class sieca132_client(object):
     def __init__(self):
-        self.lib = ctypes.WinDLL(os.path.join(os.path.dirname(__file__), 'SIECA132.DLL'))
+        self.lib = ctypes.WinDLL("SIECA132.DLL")
         return
 
     def canStatus(self, handle):

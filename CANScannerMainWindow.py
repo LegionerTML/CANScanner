@@ -1,24 +1,14 @@
 import tkinter as tk
 from tkinter import ttk, Menu, filedialog, messagebox
 import datetime
-from threading import Thread
-import os
-from ctypes import *
-import queue
-from CANFoxLib import CANFoxLibSkin, CANfoxException, CANfoxHardwareException
-from enum import *
-import settings
 import platform
 import CANTypeDefs
 import tkinter.ttk as ttk
-from ThreadCANMsgReader import ThreadCANMsgReader
 
-if platform.architecture()[0] == '32bit':
-    from sieca132_client_x32 import sieca132_client
-else:
-    from sieca132_client_x64 import sieca132_client
-
-import CANLoaderAbout
+#if platform.architecture()[0] == '32bit':
+from sieca132_client_x32 import sieca132_client
+#else:
+#   from sieca132_client_x64 import sieca132_client
 
 class RxData:
     def __init__(self):
@@ -27,9 +17,9 @@ class RxData:
     def add(self, row):
         #index = self.list1.index(row[1])
         #a = str(row[0])
-        ret, id_n, ii = self.find(row[1])
+        ret, id_n, ii = self.find(row[0])
         if ret is True:
-            self.update(ii, row[2], row[3])
+            self.update(ii, row[1], row[2])
         else:
             self.list1.append(row)
 
@@ -40,7 +30,7 @@ class RxData:
         id_n = 0
         ii = 0
         for i in range(len(self.list1)):
-            if self.list1[i][1] == id_s:
+            if self.list1[i][0] == id_s:
                 ret = True
                 id_n = self.list1[i][0]
                 ii = i
@@ -48,9 +38,9 @@ class RxData:
         return ret, id_n, ii
 
     def update(self, num, s_data, s_len):
-        self.list1[num][2] = s_data
-        self.list1[num][3] = s_len
-        self.list1[num][4] = self.list1[num][4] + 1
+        self.list1[num][1] = s_data
+        self.list1[num][2] = s_len
+        self.list1[num][3] = self.list1[num][3] + 1
         return 0
 
     def get(self, i):
@@ -130,7 +120,7 @@ class MainApplication(tk.Frame):
     def init_window(self):
         defaultMainWindowSizeX = 820
         defaultMainWindowSizeY = 600
-
+        self.counter1 = 0
 
         self.master.title("CAN Scanner v0.0.1")
         self.master.minsize(500, 400)
@@ -144,13 +134,13 @@ class MainApplication(tk.Frame):
         #tkMenuItemFile.add_command(label="Add", command=lambda: self.buttonAddClick())
         tkMenuItemFile.add_command(label="Disconnect", command=lambda: self.buttonDisconnectClick())
         self.data = RxData()
-        self.table = Table(self.master, headings=('ID', 'Data', 'Len', 'Count'))
-        self.table.pack(expand=tk.YES, fill=tk.BOTH)
+        #self.table = Table(self.master, headings=('ID', 'Data', 'Len', 'Count'))
+        #self.table.pack(expand=tk.YES, fill=tk.BOTH)
         #self.table.add((0, 0, 0, 0))
         #self.table.add((1, 1, 1, 1))
         #self.table.add((2, 2, 2, 2))
 
-        '''self.frameLog = tk.LabelFrame(self.master, relief=tk.RAISED, borderwidth=1, text="Log")
+        self.frameLog = tk.LabelFrame(self.master, relief=tk.RAISED, borderwidth=1, text="Log")
         #self.frameLog.grid(row=2, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=5, pady=5)
         self.frameLog.columnconfigure(0, weight=20, pad=3)
         self.frameLog.columnconfigure(1, weight=20, pad=3)
@@ -159,7 +149,7 @@ class MainApplication(tk.Frame):
 
 
         self.flLstResults = tk.Listbox(self.master, height=20, width = 100)
-        self.flLstResults.pack()'''
+        self.flLstResults.pack(expand=tk.YES, fill=tk.BOTH)
 
         
 
@@ -203,20 +193,27 @@ class MainApplication(tk.Frame):
         # msg2 = d_retval["canmsg"][0]
         s_data = ""
         # s_data = msg1.aby_data
-        int_id = self.shortHEX(msg1.l_id, 7)
+        #int_id = str(hex(msg1.l_id)) #self.shortHEX(msg1.l_id, 7)
         for y in range(0, msg1.by_len):
-            s_data += self.shortHEX(msg1.aby_data[y], 1) + " "
-        flagF, id_n, num = self.data.find(int_id)
+            s_data += str(hex(msg1.aby_data[y])) + " " #self.shortHEX(msg1.aby_data[y], 1) + "\t"
+        flagF, id_n, num = self.data.find(hex(msg1.l_id))
         if flagF is False:
             if msg1.l_id != 0:
-                id_s = self.table.add((int_id, s_data, msg1.by_len, 1))
-                row = [id_s, int_id, s_data, msg1.by_len, 1]
+        #id_s = self.table.add((hex(msg1.l_id), s_data, " ", d_retval["l_len"].value))
+                row = [hex(msg1.l_id), s_data, msg1.by_len, 1]
+                self.__add_log_msg__(str(row[0]) + " " + str(row[1]) + " " + str(row[2]) + " 1")#str(msg1.by_len) + " " +
                 self.data.add(row)
         else:
             self.data.update(num, s_data, msg1.by_len)
-            get_row = self.data.get(num)
-            self.table.update(id_n, (get_row[1], get_row[2], get_row[3], get_row[4]))
-            #i += 1
+            self.counter1 += 1
+            if self.counter1 >= 50:
+                self.counter1 = 0
+                get_row = self.data.getall()
+                self.flLstResults.delete(0, tk.END)
+                for i in range(0, len(get_row)):
+                    self.__add_log_msg__(str(get_row[i][0]) + " " + str(get_row[i][1]) + " " + str(get_row[i][2]) + " " + str(get_row[i][3]))
+            #self.table.update(id_n, (get_row[1], get_row[2], get_row[3], get_row[4]))
+
 
         #self.flLstResults.delete(0, tk.END)
 
@@ -224,7 +221,7 @@ class MainApplication(tk.Frame):
         for i in range(len(list_s)):
             self.__add_log_msg__(str(list_s[i]))'''
         if self.is_can_close is False:
-            self.master.after_idle(self.check_my_msg)
+            self.master.after(1, self.check_my_msg)
         else:
             return
 
@@ -252,6 +249,8 @@ class MainApplication(tk.Frame):
         d_retval = self.sieca_lib.canOpen(l_netnumber, 0, 0, l_txtimeout, l_rxtimeout, c_canAppName,
                                           c_ReceiverEventName, c_ErrorEventName)
         # self.flLstResults.insert(tk.END, CANTypeDefs.ReturnValues(d_retval["l_retval"]), d_retval["handle"])
+        #self.table.add((0, d_retval["l_retval"], 0, 0))
+
         self.siecaLibHandle = d_retval["handle"]
         self.is_can_close = False
         # siecaDllInfo = CANTypeDefs.st_InternalDLLInformation()
@@ -262,13 +261,17 @@ class MainApplication(tk.Frame):
 
         l_retval = self.sieca_lib.canSetBaudrate(self.siecaLibHandle,
                                                  int(CANTypeDefs.Baudrate.BAUD_250))  # 250 kbits/sec
+        #self.table.add((0, l_retval, 0, 0))
         #self.flLstResults.insert(tk.END, "Set Baudrate: " + str(CANTypeDefs.ReturnValues(l_retval)))
         l_retval = self.sieca_lib.canBlinkLED(self.siecaLibHandle, 0, 0b111, 0b101)
+        #self.table.add((0, l_retval, 0, 0))
         #self.flLstResults.insert(tk.END, "LED flashing settings applied: " + str(CANTypeDefs.ReturnValues(l_retval)))
         l_retval = self.sieca_lib.canIsNetOwner(d_retval["handle"])
+        #self.table.add((0, l_retval, 0, 0))
         #self.flLstResults.insert(tk.END, "CanIsNetOwner: " + str(CANTypeDefs.ReturnValues(l_retval)))
 
         l_retval = self.sieca_lib.canSetFilterMode(self.siecaLibHandle, CANTypeDefs.T_FILTER_MODE.filterMode_nofilter)
+        #self.table.add((0, l_retval, 0, 0))
         #self.flLstResults.insert(tk.END, "CanSetFilterMode: " + str(CANTypeDefs.ReturnValues(l_retval)))
         #message_reader = ThreadCANMsgReader(self.siecaLibHandle, self.sieca_lib, self.QueueIncomingMessages)
         #message_reader.start()
@@ -304,6 +307,7 @@ class MainApplication(tk.Frame):
         l_retval = self.sieca_lib.canClose(self.siecaLibHandle)
         #self.flLstResults.insert(tk.END, CANTypeDefs.ReturnValues(l_retval))
         self.is_can_close = True
+        #self.flLstResults.delete(0, tk.END)
         return
 
 def WinMain():
