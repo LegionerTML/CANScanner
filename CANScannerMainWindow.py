@@ -10,6 +10,41 @@ from sieca132_client_x32 import sieca132_client
 #else:
 #   from sieca132_client_x64 import sieca132_client
 
+view_p = 2
+yview_listbox = '0'
+
+def view_event_up(event):
+    global yview_listbox, view_p
+    yview_listbox = '0'
+    view_p = 0
+
+def view_event_down(event):
+    global yview_listbox, view_p
+    yview_listbox = tk.END
+    view_p = 1
+
+def view_event_scroll(event):
+    global view_p, yview_listbox
+    if view_p == 1:
+        view_p = 0
+        yview_listbox = '0'
+    else:
+        if view_p == 0:
+            view_p = 1
+            yview_listbox = tk.END
+
+class DescID:
+    def __init__(self):
+        self.desc = []
+
+    def find(self, id_f):
+        for i in range(len(self.desc)):
+            if self.desc[i][0] == id_f:
+                return True, self.desc[i][1], self.desc[i][2]
+        return "Unknown", "Unknown"
+
+
+
 class RxData:
     def __init__(self):
         self.list1 = []
@@ -110,8 +145,11 @@ class MainApplication(tk.Frame):
         tk.Frame.__init__(self, master)
         self.is_connect = 0
         self.counter1 = 0
+        self.data = RxData()
+        self.desc = DescID()
         self.init_window()
         self.id1 = []
+
 
     def __add_log_msg__(self, message):
         self.flLstResults.insert(tk.END, "[" + datetime.datetime.now().strftime("%H:%M:%S")+"] " + message)
@@ -122,16 +160,19 @@ class MainApplication(tk.Frame):
         if mode == 0:
             ln = int((len(s) / tabsize) + 1) * tabsize
         else:
-            ln = 12
+            s = s.ljust(10)
+            s += "|  "
+            return s
         return s.ljust(ln)
 
     def init_window(self):
-        defaultMainWindowSizeX = 820
-        defaultMainWindowSizeY = 600
+        defaultMainWindowSizeX = 1000
+        defaultMainWindowSizeY = 610
 
 
         self.master.title("CAN Scanner v0.0.1")
-        self.master.minsize(500, 400)
+        self.master.maxsize(1020, 60)
+        self.master.minsize(1000, 610)
         self.master.geometry(str(defaultMainWindowSizeX) + "x" + str(defaultMainWindowSizeY))
 
         tkMenu = Menu(self.master)
@@ -141,26 +182,24 @@ class MainApplication(tk.Frame):
         tkMenuItemFile.add_command(label="Connect", command=lambda: self.buttonConnectClick())
         #tkMenuItemFile.add_command(label="Add", command=lambda: self.buttonAddClick())
         tkMenuItemFile.add_command(label="Disconnect", command=lambda: self.buttonDisconnectClick())
-        self.data = RxData()
         #self.table = Table(self.master, headings=('ID', 'Data', 'Len', 'Count'))
         #self.table.pack(expand=tk.YES, fill=tk.BOTH)
-        #self.table.add((0, 0, 0, 0))
-        #self.table.add((1, 1, 1, 1))
-        #self.table.add((2, 2, 2, 2))
 
-        self.frameLog = tk.LabelFrame(self.master, relief=tk.RAISED, borderwidth=1, text="Log")
+        #self.frameLog = tk.LabelFrame(self.master, relief=tk.RAISED, borderwidth=1, text="Log")
         #self.frameLog.grid(row=2, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=5, pady=5)
-        self.frameLog.columnconfigure(0, weight=20, pad=3)
-        self.frameLog.columnconfigure(1, weight=20, pad=3)
-        self.frameLog.rowconfigure(0, weight=1, pad=3)
-        
-
+        #self.frameLog.columnconfigure(0, weight=20, pad=3)
+        #self.frameLog.columnconfigure(1, weight=20, pad=3)
+        #self.frameLog.rowconfigure(0, weight=1, pad=3)
 
         self.flLstResults = tk.Listbox(self.master, height=20, width = 100, font = 'Courier')
+        scrollbar = tk.Scrollbar(self, command=self.flLstResults.yview)
+        self.flLstResults.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.flLstResults.pack(expand=tk.YES, fill=tk.BOTH)
 
-        
-
+        self.master.bind('<Up>', view_event_up)
+        self.master.bind('<Down>', view_event_down)
+        self.master.bind('<MouseWheel>', view_event_scroll)
         #self.__add_log_msg__("self.frameLog.grid(row=2, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=5, pady=5)")
         #buttonConnect = tk.Button(self.master, state="normal", text=r"Connect", command=self.buttonCANConnectClick)
         #buttonConnect.grid()
@@ -191,6 +230,12 @@ class MainApplication(tk.Frame):
 
         return
 
+    def scrollM(self):
+        if self.view_p == 0:
+            self.yview_listbox = tk.END
+        else:
+            self.yview_listbox = '0'
+
     def check_my_msg(self):
         #i = 0
         #while i<30:
@@ -209,18 +254,27 @@ class MainApplication(tk.Frame):
         if flagF is False:
             if msg1.l_id != 0:
         #id_s = self.table.add((hex(msg1.l_id), s_data, " ", d_retval["l_len"].value))
-                row = [int_id, s_data, msg1.by_len, 1]
-                self.__add_log_msg__(str(row[0]) + " " + row[1] + " " + str(row[2]) + "   " + self.tabify("1")) #str(msg1.by_len) + " " +
+                sender, reader = self.desc.find(int_id)
+                row = [int_id, s_data, msg1.by_len, 1, sender, reader]
+                self.__add_log_msg__(str(row[0]) + row[4] + "  |  " + row[5] + "|  " + row[1] + "|  " + str(row[2])
+                                     + "  |  " + self.tabify("1")) #str(msg1.by_len) + " " +
                 self.data.add(row)
         else:
-            self.data.update(num, s_data, self.tabify(str(msg1.by_len)))
+            self.data.update(num, s_data, str(msg1.by_len))
             self.counter1 += 1
             if self.counter1 >= 80:
                 self.counter1 = 0
                 get_row = self.data.getall()
                 self.flLstResults.delete(0, tk.END)
+
+                self.flLstResults.insert(tk.END, u"              ID     |  Отправитель  |  Приемник  |              Данные              |     | Count")
+                self.flLstResults.insert(tk.END, "---------------------+---------------+------------+----------------------------------+-----+------")
                 for i in range(0, len(get_row)):
-                    self.__add_log_msg__(str(get_row[i][0]) + " " + get_row[i][1] + " " + str(get_row[i][2]) + " " + str(get_row[i][3]))
+                    self.__add_log_msg__(str(get_row[i][0]) + "  " + get_row[i][4] + "    |  " + get_row[i][5] + "   |  "
+                                         + get_row[i][1] + "|  " + str(get_row[i][2]) + "  |  " + str(get_row[i][3]))
+                self.flLstResults.yview(yview_listbox)
+
+                #self.flLstResults.()
             #self.table.update(id_n, (get_row[1], get_row[2], get_row[3], get_row[4]))
 
 
@@ -269,6 +323,8 @@ class MainApplication(tk.Frame):
                     if l_retval == 0:
                         l_retval = self.sieca_lib.canSetFilterMode(self.siecaLibHandle, CANTypeDefs.T_FILTER_MODE.filterMode_nofilter)
                         if l_retval == 0:
+                            global view_p
+                            view_p = 0
                             self.check_my_msg()
         else:
             #message
@@ -313,6 +369,8 @@ class MainApplication(tk.Frame):
             l_retval = self.sieca_lib.canClose(self.siecaLibHandle)
             if l_retval == 0:
                 self.is_connect = 0
+                global view_p
+                view_p = 2
         #self.flLstResults.insert(tk.END, CANTypeDefs.ReturnValues(l_retval))
         #self.flLstResults.delete(0, tk.END)
         return
