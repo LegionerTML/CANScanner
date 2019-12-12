@@ -36,12 +36,74 @@ def view_event_scroll(event):
 class DescID:
     def __init__(self):
         self.desc = []
+        self.desc.append(["199  |  ", "Джойстики КВГ      |  ", "Контроллер"])
+        self.desc.append(["18020203  |  ", "      АЗК          |  ", "Контроллер"])
+        self.desc.append(["195  |  ", "ПДУ - дж. движ.    |  ", "Контроллер"])
+        self.desc.append(["196  |  ", "ПДУ - дж. навес.   |  ", "Контроллер"])
+        self.desc.append(["198  |  ", "ПДУ - об. ДВС      |  ", "Контроллер"])
+        self.desc.append(["18050603  |  ", "Датч. пол. отвала  |  ", "Контроллер"])    #Положение отвала
+        self.desc.append(["18050703  |  ", "Датч. пол. рамы    |  ", "Контроллер"])    #Положение рамы
+        self.desc.append(["18050803  |  ", "Датч. пол. рыхл.   |  ", "Контроллер"])    #Положение рыхл.
+        self.desc.append(["18020103  |  ", "   Контроллер      |  ", " Android  "])    #Дж. движения
+        self.desc.append(["18020203  |  ", "   Контроллер      |  ", " Android  "])    #Токи насосов, вперед
+        self.desc.append(["18020303  |  ", "   Контроллер      |  ", " Android  "])    #Токи насосов, назад
+        self.desc.append(["18020403  |  ", "   Контроллер      |  ", " Android  "])    #Токи моторов
+        self.desc.append(["18020503  |  ", "   Контроллер      |  ", " Android  "])    #Потенц. ДВС
+        self.desc.append(["18020603  |  ", "   Контроллер      |  ", " Android  "])    #Уст. токи насосов
+        self.desc.append(["18020703  |  ", "   Контроллер      |  ", " Android  "])    #Уст. токи моторов
+        self.desc.append(["18020803  |  ", "   Контроллер      |  ", " Android  "])    #Передача, скорость
+        self.desc.append(["18020903  |  ", "   Контроллер      |  ", " Android  "])    #Параметры
+        self.desc.append(["18021003  |  ", "   Контроллер      |  ", " Android  "])    #Моточасы, сер.н., токи FAN
+        self.desc.append(["18021103  |  ", "   Контроллер      |  ", " Android  "])    #Гран. токов отвала, верт.
+        self.desc.append(["18021203  |  ", "   Контроллер      |  ", " Android  "])    #Гран. токов отвала, гориз.
+        self.desc.append(["18021303  |  ", "   Контроллер      |  ", " Android  "])    #Гран. токов рыхл., верт.
+        self.desc.append(["18021403  |  ", "   Контроллер      |  ", " Android  "])    #Гран. токов рыхл., гориз.
+        self.desc.append(["18021503  |  ", "   Контроллер      |  ", " Android  "])    #Давл. насосов, тормоз, плав.
+        self.desc.append(["18021603  |  ", "   Контроллер      |  ", " Android  "])    #Давл. насосов навес., FAN
+        self.desc.append(["18022003  |  ", "   Контроллер      |  ", "   MI3    "])    #MI3
+        self.desc.append(["18022103  |  ", "   Контроллер      |  ", "   MI3    "])    #MI3
+        self.desc.append(["18030003  |  ", "    Android        |  ", "Контроллер"])    #параметры
+        self.desc.append(["18030303  |  ", "   Контроллер      |  ", " Дисплей  "])    #
+        self.desc.append(["18030403  |  ", "   Контроллер      |  ", " Дисплей  "])    #
+        self.desc.append(["18030503  |  ", "   Контроллер      |  ", " Дисплей  "])    #
+        self.desc.append(["18030603  |  ", "   Контроллер      |  ", " Дисплей  "])    #
+        self.desc.append(["18030703  |  ", "   Контроллер      |  ", " Дисплей  "])    #
+        self.desc.append(["18030803  |  ", "   Контроллер      |  ", " Дисплей  "])    #
+        self.desc.append(["18030903  |  ", "   Контроллер      |  ", " Дисплей  "])    #
+        self.desc.append(["18031003  |  ", "   Контроллер      |  ", " Дисплей  "])    #
+        self.desc.append(["18040103  |  ", "   Контроллер      |  ", " Дисплей  "])    #
+        self.desc.append(["18040203  |  ", "   Контроллер      |  ", " Дисплей  "])    #
+        self.desc.append(["18F00403  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18F00303  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FEDF03  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18000003  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FEEE03  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FEF603  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FEF803  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18F00503  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FF0003  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18F01A03  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FEEF03  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FDD603  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FE2003  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FE2103  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FE6803  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FD9503  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FE4703  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18F02103  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FEE503  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FE2203  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FE2303  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FE2403  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18FE4503  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18F00D03  |  ", "     J1939         |  ", "Контроллер"])    #
+
 
     def find(self, id_f):
         for i in range(len(self.desc)):
             if self.desc[i][0] == id_f:
                 return True, self.desc[i][1], self.desc[i][2]
-        return "Unknown", "Unknown"
+        return False, "    Unknown        |  ", " Unknown  "
 
 
 
@@ -160,7 +222,7 @@ class MainApplication(tk.Frame):
         if mode == 0:
             ln = int((len(s) / tabsize) + 1) * tabsize
         else:
-            s = s.ljust(10)
+            s = s.ljust(tabsize)
             s += "|  "
             return s
         return s.ljust(ln)
@@ -171,7 +233,7 @@ class MainApplication(tk.Frame):
 
 
         self.master.title("CAN Scanner v0.0.1")
-        self.master.maxsize(1020, 60)
+        #self.master.maxsize(1020, 60)
         self.master.minsize(1000, 610)
         self.master.geometry(str(defaultMainWindowSizeX) + "x" + str(defaultMainWindowSizeY))
 
@@ -246,7 +308,7 @@ class MainApplication(tk.Frame):
         # msg2 = d_retval["canmsg"][0]
         s_data = ""
         # s_data = msg1.aby_data
-        int_id = self.tabify(self.shortHEX(msg1.l_id, 0), mode=1)
+        int_id = self.tabify(self.shortHEX(msg1.l_id, 0), mode=1, tabsize=10)
         for y in range(0, msg1.by_len):
             s_data += self.tabify(self.shortHEX(msg1.aby_data[y], 1))
         #fake_data = self.tabify('11') + self.tabify('22') + self.tabify('33') + self.tabify('44')
@@ -254,7 +316,7 @@ class MainApplication(tk.Frame):
         if flagF is False:
             if msg1.l_id != 0:
         #id_s = self.table.add((hex(msg1.l_id), s_data, " ", d_retval["l_len"].value))
-                sender, reader = self.desc.find(int_id)
+                find_flag, sender, reader = self.desc.find(int_id)
                 row = [int_id, s_data, msg1.by_len, 1, sender, reader]
                 self.__add_log_msg__(str(row[0]) + row[4] + "  |  " + row[5] + "|  " + row[1] + "|  " + str(row[2])
                                      + "  |  " + self.tabify("1")) #str(msg1.by_len) + " " +
@@ -267,10 +329,10 @@ class MainApplication(tk.Frame):
                 get_row = self.data.getall()
                 self.flLstResults.delete(0, tk.END)
 
-                self.flLstResults.insert(tk.END, u"              ID     |  Отправитель  |  Приемник  |              Данные              |     | Count")
-                self.flLstResults.insert(tk.END, "---------------------+---------------+------------+----------------------------------+-----+------")
+                self.flLstResults.insert(tk.END, u"              ID     |     Отправитель     |   Приемник   |              Данные              |     | Count")
+                self.flLstResults.insert(tk.END, "---------------------+---------------------+--------------+----------------------------------+-----+------")
                 for i in range(0, len(get_row)):
-                    self.__add_log_msg__(str(get_row[i][0]) + "  " + get_row[i][4] + "    |  " + get_row[i][5] + "   |  "
+                    self.__add_log_msg__(str(get_row[i][0]) + get_row[i][4] + get_row[i][5] + "  |  "
                                          + get_row[i][1] + "|  " + str(get_row[i][2]) + "  |  " + str(get_row[i][3]))
                 self.flLstResults.yview(yview_listbox)
 
@@ -362,6 +424,24 @@ class MainApplication(tk.Frame):
             i += 1'''
         # self.process_queue()
 
+        return
+
+    def SendMsg(self, msg, timeout=0):
+        canmsg = CANTypeDefs.CMSG()
+        canmsg.l_id =  msg.id
+        canmsg.by_len = msg.len
+        bytedata = bytearray(msg.data)
+        canmsg.aby_data[:] = bytedata
+        canmsg.by_extended = 1
+        canmsg.by_remote = 0
+
+        result = self.sieca_client.canSend(self.siecaLibHandle, canmsg, 1)
+        if result == 0:
+            #goodmessage
+            pass
+        else:
+            #badmessage
+            pass
         return
 
     def buttonDisconnectClick(self):
