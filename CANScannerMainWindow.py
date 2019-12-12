@@ -73,30 +73,32 @@ class DescID:
         self.desc.append(["18031003  |  ", "   Контроллер      |  ", " Дисплей  "])    #
         self.desc.append(["18040103  |  ", "   Контроллер      |  ", " Дисплей  "])    #
         self.desc.append(["18040203  |  ", "   Контроллер      |  ", " Дисплей  "])    #
-        self.desc.append(["18F00403  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18F00303  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FEDF03  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18000003  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FEEE03  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FEF603  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FEF803  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18F00503  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FF0003  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18F01A03  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FEEF03  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FDD603  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FE2003  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FE2103  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FE6803  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FD9503  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FE4703  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18F02103  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FEE503  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FE2203  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FE2303  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FE2403  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18FE4503  |  ", "     J1939         |  ", "Контроллер"])    #
-        self.desc.append(["18F00D03  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18f00403  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18f00303  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fedf03  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["c000003   |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18feee03  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fef603  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fef803  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18f00503  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18ff0003  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18f01a03  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18feef03  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fdd603  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fe2003  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fe2103  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fe6803  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fd9503  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fe4703  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18f02103  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fee503  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fe2203  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fe2303  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fe2403  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fe4503  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18f00d03  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18febd03  |  ", "     J1939         |  ", "Контроллер"])    #
+        self.desc.append(["18fef103  |  ", "     J1939         |  ", "Контроллер"])    #
 
 
     def find(self, id_f):
@@ -228,8 +230,8 @@ class MainApplication(tk.Frame):
         return s.ljust(ln)
 
     def init_window(self):
-        defaultMainWindowSizeX = 1000
-        defaultMainWindowSizeY = 610
+        defaultMainWindowSizeX = 1080
+        defaultMainWindowSizeY = 620
 
 
         self.master.title("CAN Scanner v0.0.1")
@@ -239,6 +241,7 @@ class MainApplication(tk.Frame):
 
         tkMenu = Menu(self.master)
         self.master.config(menu=tkMenu)
+
         tkMenuItemFile = Menu(tkMenu, tearoff=0)
         tkMenu.add_cascade(label="Program", menu=tkMenuItemFile)
         tkMenuItemFile.add_command(label="Connect", command=lambda: self.buttonConnectClick())
@@ -247,21 +250,70 @@ class MainApplication(tk.Frame):
         #self.table = Table(self.master, headings=('ID', 'Data', 'Len', 'Count'))
         #self.table.pack(expand=tk.YES, fill=tk.BOTH)
 
-        #self.frameLog = tk.LabelFrame(self.master, relief=tk.RAISED, borderwidth=1, text="Log")
-        #self.frameLog.grid(row=2, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=5, pady=5)
-        #self.frameLog.columnconfigure(0, weight=20, pad=3)
-        #self.frameLog.columnconfigure(1, weight=20, pad=3)
-        #self.frameLog.rowconfigure(0, weight=1, pad=3)
-
-        self.flLstResults = tk.Listbox(self.master, height=20, width = 100, font = 'Courier')
-        scrollbar = tk.Scrollbar(self, command=self.flLstResults.yview)
-        self.flLstResults.configure(yscrollcommand=scrollbar.set)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        self.flLstResults.pack(expand=tk.YES, fill=tk.BOTH)
-
         self.master.bind('<Up>', view_event_up)
         self.master.bind('<Down>', view_event_down)
         self.master.bind('<MouseWheel>', view_event_scroll)
+
+        tabControl = ttk.Notebook(self)
+        tabReading = ttk.Frame(tabControl)
+        tabDesc = ttk.Frame(tabControl)
+        tabSending = ttk.Frame(tabControl)
+        tabControl.add(tabReading, text="Reading")
+        tabControl.add(tabDesc, text="Description")
+        tabControl.add(tabSending, text="Sending")
+        #tabControl.grid(row=0, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=3, pady=3)
+        tabControl.pack(expand=tk.YES, fill=tk.BOTH)
+        tabControl.rowconfigure(0, weight=1)
+        tabControl.columnconfigure(0, weight=1)
+        tabReading.columnconfigure(0, weight=1)
+        tabReading.rowconfigure(0, weight=1)
+        tabDesc.columnconfigure(0, weight=1)
+        tabDesc.rowconfigure(0, weight=1)
+        tabSending.columnconfigure(0, weight=1)
+        tabSending.rowconfigure(0, weight=1)
+        '''self.frameLog = tk.LabelFrame(tabReading, relief=tk.RAISED, borderwidth=1, text="Log")
+        self.frameLog.grid(row=2, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=5, pady=5)
+        self.frameLog.columnconfigure(0, weight=20, pad=3)
+        self.frameLog.columnconfigure(1, weight=1, pad=3)
+        self.frameLog.rowconfigure(0, weight=1, pad=3)'''
+
+        self.textID = tk.Text(tabSending, height=1,width=10,font='Courier',wrap=tk.WORD)
+        self.textID.grid(row=0, column=1, sticky=tk.N + tk.E, padx=5, pady=5)
+
+        self.textLen = tk.Text(tabSending, height=1, width=5, font='Courier', wrap=tk.WORD)
+        self.textLen.grid(row=0, column=2, sticky=tk.N + tk.W, padx=5, pady=5)
+
+        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
+        self.textData.grid(row=0, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
+        '''self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
+        self.textData.grid(row=1, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
+        self.textData.grid(row=2, column=3, sticky=tk.N + tk.W, padx=5, pady=5)'''
+        '''self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
+        self.textData.grid(row=3, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
+        self.textData.grid(row=4, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
+        self.textData.grid(row=5, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
+        self.textData.grid(row=6, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
+        self.textData.grid(row=7, column=3, sticky=tk.N + tk.W, padx=5, pady=5)'''
+
+        self.buttonCanSend = tk.Button(tabSending, wraplength=50, state="normal", text=r"Send",
+                                          command=self.buttonCANSendClick)
+        self.buttonCanSend.grid(row=0, column=0, sticky=tk.N + tk.W, padx=5, pady=5)
+
+        self.flLstResults = tk.Listbox(tabReading, font = 'Courier')
+        #scrollbar = tk.Scrollbar(self, command=self.flLstResults.yview)
+        #self.flLstResults.configure(yscrollcommand=scrollbar.set)
+        #scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        #self.flLstResults.config(height=20)
+        #self.flLstResults.grid(row=0, column=0, sticky=tk.N + tk.S + tk.W + tk.E)
+        self.flLstResults.pack(expand=tk.YES, fill=tk.BOTH)
+
+        self.listDesc = tk.Listbox(tabDesc, font='Courier')
+        self.listDesc.pack(expand=tk.YES, fill=tk.BOTH)
         #self.__add_log_msg__("self.frameLog.grid(row=2, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=5, pady=5)")
         #buttonConnect = tk.Button(self.master, state="normal", text=r"Connect", command=self.buttonCANConnectClick)
         #buttonConnect.grid()
@@ -270,6 +322,7 @@ class MainApplication(tk.Frame):
         label1.grid(column=10, row=1)
         label2 = tk.Label(self.master, text="2")
         label2.grid(column=5, row=5)'''
+        self.pack(fill=tk.BOTH, expand=tk.YES)
         self.master.mainloop()
 
     def buttonAddClick(self):
@@ -426,22 +479,32 @@ class MainApplication(tk.Frame):
 
         return
 
-    def SendMsg(self, msg, timeout=0):
-        canmsg = CANTypeDefs.CMSG()
-        canmsg.l_id =  msg.id
-        canmsg.by_len = msg.len
-        bytedata = bytearray(msg.data)
-        canmsg.aby_data[:] = bytedata
-        canmsg.by_extended = 1
-        canmsg.by_remote = 0
+    def buttonCANSendClick(self):
+        mess = []
+        mess.append(0x18555503)
+        mess.append(8)
+        mess.append([0x15, 0x15, 0x15, 0x15, 0x15, 0x15, 0x15, 0x15])
+        mess.append(1)
+        mess.append(0)
+        self.SendMsg(mess)
+        return
 
-        result = self.sieca_client.canSend(self.siecaLibHandle, canmsg, 1)
+    def SendMsg(self, msg, timeout=None):
+        canmsg = CANTypeDefs.CMSG()
+        canmsg.l_id = msg[0]
+        canmsg.by_len = msg[1]
+        bytedata = bytearray(msg[2])
+        canmsg.aby_data[:] = bytedata
+        canmsg.by_extended = msg[3]
+        canmsg.by_remote = msg[4]
+
+        '''result = self.sieca_client.canSend(self.siecaLibHandle, canmsg, 1)
         if result == 0:
             #goodmessage
             pass
         else:
             #badmessage
-            pass
+            pass'''
         return
 
     def buttonDisconnectClick(self):
