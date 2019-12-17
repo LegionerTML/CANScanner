@@ -5,6 +5,7 @@ import platform
 import CANTypeDefs
 import tkinter.ttk as ttk
 import os
+import threading
 
 #if platform.architecture()[0] == '32bit':
 from sieca132_client_x32 import sieca132_client
@@ -13,6 +14,12 @@ from sieca132_client_x32 import sieca132_client
 
 view_p = 2
 yview_listbox = '0'
+
+
+
+
+def openDescriptionEvent(event):
+    pass
 
 def view_event_up(event):
     global yview_listbox, view_p
@@ -231,26 +238,27 @@ class MainApplication(tk.Frame):
         return s.ljust(ln)
 
     def init_window(self):
-        defaultMainWindowSizeX = 1000
-        defaultMainWindowSizeY = 620
+        defaultMainWindowSizeX = 615
+        defaultMainWindowSizeY = 580
 
-        self.main_path = os.path.dirname(os.path.realpath(__file__))
+        #self.main_path = os.path.dirname(os.path.realpath(__file__))
         self.master.title("CAN Scanner v0.0.1")
         #self.master.maxsize(1020, 60)
-        self.master.minsize(1000, 610)
+        #self.master.minsize(1000, 610)
         self.master.geometry(str(defaultMainWindowSizeX) + "x" + str(defaultMainWindowSizeY))
 
         self.frame1 = tk.Frame(self.master, bd=1, relief=tk.RAISED)
         tkMenu = Menu(self.frame1)
         self.master.config(menu=tkMenu)
 
-        tkMenuItemFile = Menu(tkMenu, tearoff=0)
-        tkMenu.add_cascade(label="Program", menu=tkMenuItemFile)
-        tkMenuItemFile.add_command(label="Connect", command=lambda: self.buttonConnectClick())
-        tkMenuItemFile.add_command(label="Read", command=lambda: self.buttonReadClick())
-        #tkMenuItemFile.add_command(label="Add", command=lambda: self.buttonAddClick())
-        tkMenuItemFile.add_separator()
-        tkMenuItemFile.add_command(label="Disconnect", command=lambda: self.buttonDisconnectClick())
+        tkMenuConnection = Menu(tkMenu, tearoff=0)
+        tkMenuAction = Menu(tkMenu, tearoff=0)
+        tkMenu.add_cascade(label="Connection", menu=tkMenuConnection)
+        tkMenu.add_cascade(label="Action", menu=tkMenuAction)
+        tkMenuConnection.add_command(label="Connect", command=lambda: self.buttonConnectClick())
+        tkMenuConnection.add_command(label="Disconnect", command=lambda: self.buttonDisconnectClick())
+        tkMenuAction.add_command(label="Read", command=lambda: self.buttonReadClick())
+        tkMenuAction.add_command(label="Save log", command=lambda: self.saveLogScript())
         #tkLab = tk.Radiobutton(text='Disconnected', value=0)
         #tkMenu.add_command(label='Disconnected')
         #self.table = Table(self.master, headings=('ID', 'Data', 'Len', 'Count'))
@@ -284,51 +292,92 @@ class MainApplication(tk.Frame):
         self.frameLog.columnconfigure(1, weight=1, pad=3)
         self.frameLog.rowconfigure(0, weight=1, pad=3)'''
 
-        self.textID = tk.Text(tabSending, height=1,width=10,font='Courier',wrap=tk.WORD)
-        self.textID.pack()
-        #self.textID.grid(row=0, column=1, sticky=tk.N + tk.E, padx=5, pady=5)
+        sendFrame = tk.Frame(tabSending)
+        sendFrame.grid(row=0, column=0, sticky=tk.W + tk.N + tk.S + tk.E)
+        self.textID = tk.Entry(sendFrame, width=8, font='Courier 8')
+        self.textID.grid(row=0, column=1, sticky=tk.N + tk.W, columnspan=3, padx=5, pady=5)
+        self.textID.bind('<KeyRelease>', self.keyEventID)
+        #self.textID.grid(row=2, column=0,row=0, column=1, sticky=tk.N + tk.E, padx=5, pady=5)
 
-        self.textLen = tk.Text(tabSending, height=1, width=5, font='Courier', wrap=tk.WORD)
-        self.textLen.pack()
+        self.textLen = tk.Entry(sendFrame, width=2, font='Courier 8')
+        self.textLen.grid(row=1, column=1, sticky=tk.N + tk.W, columnspan=3, padx=5, pady=5)
+        self.textLen.bind('<KeyRelease>', self.keyEventLen)
         #self.textLen.grid(row=0, column=2, sticky=tk.N + tk.W, padx=5, pady=5)
 
-        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
-        self.textData.pack()
-        #self.textData.grid(row=0, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
-        '''self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
-        self.textData.grid(row=1, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
-        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
-        self.textData.grid(row=2, column=3, sticky=tk.N + tk.W, padx=5, pady=5)'''
-        '''self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
-        self.textData.grid(row=3, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
-        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
-        self.textData.grid(row=4, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
-        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
-        self.textData.grid(row=5, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
-        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
-        self.textData.grid(row=6, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
-        self.textData = tk.Text(tabSending, height=1, width=10, font='Courier', wrap=tk.WORD)
-        self.textData.grid(row=7, column=3, sticky=tk.N + tk.W, padx=5, pady=5)'''
+        self.textData1 = tk.Entry(sendFrame, width=2, font='Courier 8')
+        self.textData2 = tk.Entry(sendFrame, width=2, font='Courier 8')
+        self.textData3 = tk.Entry(sendFrame, width=2, font='Courier 8')
+        self.textData4 = tk.Entry(sendFrame, width=2, font='Courier 8')
+        self.textData5 = tk.Entry(sendFrame, width=2, font='Courier 8')
+        self.textData6 = tk.Entry(sendFrame, width=2, font='Courier 8')
+        self.textData7 = tk.Entry(sendFrame, width=2, font='Courier 8')
+        self.textData8 = tk.Entry(sendFrame, width=2, font='Courier 8')
+        self.textData1.grid(row=2, column=1, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData2.grid(row=2, column=2, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData3.grid(row=2, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData4.grid(row=2, column=4, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData5.grid(row=2, column=5, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData6.grid(row=2, column=6, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData7.grid(row=2, column=7, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textData8.grid(row=2, column=8, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textID.insert(tk.INSERT, "18555503")
+        self.textData1.insert(tk.INSERT, "00")
+        self.textData2.insert(tk.INSERT, "00")
+        self.textData3.insert(tk.INSERT, "00")
+        self.textData4.insert(tk.INSERT, "00")
+        self.textData5.insert(tk.INSERT, "00")
+        self.textData6.insert(tk.INSERT, "00")
+        self.textData7.insert(tk.INSERT, "00")
+        self.textData8.insert(tk.INSERT, "00")
+        self.textLen.insert(tk.INSERT, "8")
+        self.textData1.bind('<KeyRelease>', self.keyEvent1)
+        self.textData2.bind('<KeyRelease>', self.keyEvent2)
+        self.textData3.bind('<KeyRelease>', self.keyEvent3)
+        self.textData4.bind('<KeyRelease>', self.keyEvent4)
+        self.textData5.bind('<KeyRelease>', self.keyEvent5)
+        self.textData6.bind('<KeyRelease>', self.keyEvent6)
+        self.textData7.bind('<KeyRelease>', self.keyEvent7)
+        self.textData8.bind('<KeyRelease>', self.keyEvent8)
 
-        self.buttonCanSend = tk.Button(tabSending, wraplength=50, state="normal", text=r"Send",
-                                          command=self.buttonCANSendClick)
-        self.buttonCanSend.pack()
+
+
+        self.textCycle = tk.Entry(sendFrame, width=5, font='Courier 8')
+        self.textCycle.grid(columnspan=2, row=3, column=1, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.textCycle.insert(tk.INSERT, "500")
+        self.textCycle.bind('<KeyRelease>', self.keyEventCycle)
+        #self.textData.grid(row=0, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
+
+
+        self.buttonCanSend = tk.Button(sendFrame, wraplength=50, state="normal", text=r"Send", width=10,
+                                          command=self.buttonCANSendClick, relief=tk.RAISED)
+        self.buttonCanSend.grid(row=4, column=0, columnspan=4, sticky=tk.N + tk.W, padx=5, pady=5)
         #self.buttonCanSend.grid(row=0, column=0, sticky=tk.N + tk.W, padx=5, pady=5)
 
-        self.resLabel = tk.Label(tabSending, text="")
-        self.resLabel.pack()
-
-
-        self.flLstResults = tk.Listbox(tabReading, font = 'Courier')
-        #scrollbar = tk.Scrollbar(self, command=self.flLstResults.yview)
-        #self.flLstResults.configure(yscrollcommand=scrollbar.set)
-        #scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        #self.flLstResults.config(height=20)
-        #self.flLstResults.grid(row=0, column=0, sticky=tk.N + tk.S + tk.W + tk.E)
-        self.flLstResults.pack(expand=tk.YES, fill=tk.BOTH)
+        self.idLabel = tk.Label(sendFrame, text="ID: ")
+        self.lenLabel = tk.Label(sendFrame, text="Len: ")
+        self.dataLabel = tk.Label(sendFrame, text="Data: ")
+        self.cycleLabel = tk.Label(sendFrame, text="Cycle: ")
+        self.idLabel.grid(row=0, column=0, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.lenLabel.grid(row=1, column=0, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.dataLabel.grid(row=2, column=0, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.cycleLabel.grid(row=3, column=0, sticky=tk.N + tk.W, padx=5, pady=5)
+        self.resLabel = tk.Label(sendFrame, text="")
+        self.resLabel.grid(row=4, column=3, columnspan=5, sticky=tk.N + tk.W, padx=5, pady=5)
 
         self.listDesc = tk.Listbox(tabDesc, font='Courier')
         self.listDesc.pack(expand=tk.YES, fill=tk.BOTH)
+        self.listDesc.bind("<Double-Button-1>", openDescriptionEvent)
+
+        self.flLstResults = tk.Listbox(tabReading, font='Courier')
+        #scrollbarF1 = tk.Scrollbar(tabReading, command=self.flLstResults.yview, orient=tk.VERTICAL)
+        #self.flLstResults.configure(yscrollcommand=scrollbarF1.set)
+        #scrollbarF1.pack(side=tk.RIGHT, fill=tk.Y)
+        scrollbar = tk.Scrollbar(tabDesc, command=self.listDesc.xview, orient=tk.HORIZONTAL)
+        self.listDesc.configure(xscrollcommand=scrollbar.set)
+        scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
+        self.flLstResults.pack(expand=tk.YES, fill=tk.BOTH)
+
+
         #self.__add_log_msg__("self.frameLog.grid(row=2, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=5, pady=5)")
         #buttonConnect = tk.Button(self.master, state="normal", text=r"Connect", command=self.buttonCANConnectClick)
         #buttonConnect.grid()
@@ -360,6 +409,11 @@ class MainApplication(tk.Frame):
 
         return
 
+    def saveLogScript(self):
+        #сохранение логов
+        #индикация/сообщение
+        return
+
     def scrollM(self):
         if self.view_p == 0:
             self.yview_listbox = tk.END
@@ -386,44 +440,51 @@ class MainApplication(tk.Frame):
         #id_s = self.table.add((hex(msg1.l_id), s_data, " ", d_retval["l_len"].value))
                 find_flag, sender, reader = self.desc.find(int_id)
                 row = [int_id, s_data, msg1.by_len, 1, sender, reader]
-                if self.master.focus_get() == self.listDesc:
-                    self.listDesc.insert(tk.END, str(datetime.datetime.now()) + str(row[0]) + row[4] + "  |  " + row[5] + "|  " + self.tabify("1"))
-                    self.listDesc.yview(yview_listbox)
-                else:
-                    self.flLstResults.insert(tk.END,
-                                         str(datetime.datetime.now()) + str(row[0]) + row[1] + "|  " + str(row[2])
-                                         + "  |  " + self.tabify("1"))
-                    self.flLstResults.yview(yview_listbox)
+                #if self.master.focus_get() == self.listDesc:
+                self.listDesc.insert(tk.END, str(row[0]) + row[4] + "  |  " + row[5] + "|  " + self.tabify("1"))
+                self.listDesc.yview(yview_listbox)
+                #else:
+                self.flLstResults.insert(tk.END, str(row[0]) + row[1] + "|  " + str(row[2])
+                                     + "  |  " + self.tabify("1"))
+                self.flLstResults.yview(yview_listbox)
                 self.data.add(row)
-                with open(self.main_path + 'log.txt', 'a') as file:
-                    file.write("%s\n" % (str(datetime.datetime.now() - self.starttime) + " " + str(row[0]) + " " + row[1] + " " + str(row[2])))
+                #запись логов в файл
+                #with open(self.main_path + 'log.txt', 'a') as file:
+                #    file.write("%s\n" % (str(datetime.datetime.now() - self.starttime) + " " + str(row[0]) + " " + row[1] + " " + str(row[2])))
         else:
             self.data.update(num, s_data, str(msg1.by_len))
-            with open(self.main_path + 'log.txt', 'a') as file:
-                file.write("%s\n" % (str(datetime.datetime.now() - self.starttime) + " " + str(int_id) + " " + s_data + " " + str(msg1.by_len)))
+            #запись логов в файл
+            #with open(self.main_path + 'log.txt', 'a') as file:
+            #   file.write("%s\n" % (str(datetime.datetime.now() - self.starttime) + " " + str(int_id) + " " + s_data + " " + str(msg1.by_len)))
             self.counter1 += 1
+            w = self.master.geometry()
             if self.counter1 >= 80:
                 self.counter1 = 0
                 get_row = self.data.getall()
-                if self.master.focus_get() == self.listDesc:
-                    self.listDesc.delete(0, tk.END)
-                    self.listDesc.insert(tk.END,
+                #if self.master.focus_get() == self.listDesc:
+                self.listDesc.delete(0, tk.END)
+                self.flLstResults.delete(0, tk.END)
+                self.listDesc.insert(tk.END,
                                              u"   ID     |     Отправитель     |   Приемник   | Count")
-                    self.listDesc.insert(tk.END,
+                self.listDesc.insert(tk.END,
                                              "----------+---------------------+--------------+------")
-                    for i in range(0, len(get_row)):
-                        self.listDesc.insert(tk.END, str(get_row[i][0]) + get_row[i][4] + get_row[i][5] + "  |  " + str(get_row[i][3]))
-                    self.listDesc.insert(tk.END, self.master.focus_get())
-                    self.listDesc.yview(yview_listbox)
-                else:
-                    self.flLstResults.delete(0, tk.END)
-                    self.flLstResults.insert(tk.END, u"   ID     |              Данные              |     | Count")
-                    self.flLstResults.insert(tk.END, "----------+----------------------------------+-----+------")
-                    for i in range(0, len(get_row)):
-                        self.flLstResults.insert(tk.END, str(get_row[i][0]) + get_row[i][1] + "|  " + str(get_row[i][2]) + "  |  " + str(get_row[i][3]))
+                self.flLstResults.insert(tk.END, u"   ID     |              Данные              |     | Count")
+                self.flLstResults.insert(tk.END, "----------+----------------------------------+-----+------")
+                for i in range(0, len(get_row)):
+                    self.listDesc.insert(tk.END, str(get_row[i][0]) + get_row[i][4] + get_row[i][5] + "  |  " + str(get_row[i][3]))
+                    self.flLstResults.insert(tk.END, str(get_row[i][0]) + get_row[i][1] + "|  " + str(
+                        get_row[i][2]) + "  |  " + str(get_row[i][3]))
+                    #self.listDesc.insert(tk.END, str(w))
+                self.listDesc.yview(yview_listbox)
+                #else:
+                    #self.flLstResults.delete(0, tk.END)
+                    #self.flLstResults.insert(tk.END, u"   ID     |              Данные              |     | Count")
+                    #self.flLstResults.insert(tk.END, "----------+----------------------------------+-----+------")
+                    #for i in range(0, len(get_row)):
+                    #    self.flLstResults.insert(tk.END, str(get_row[i][0]) + get_row[i][1] + "|  " + str(get_row[i][2]) + "  |  " + str(get_row[i][3]))
 
-                    self.flLstResults.insert(tk.END, self.master.focus_get())
-                    self.flLstResults.yview(yview_listbox)
+                    #self.flLstResults.insert(tk.END, str(w))
+                self.flLstResults.yview(yview_listbox)
                 #self.
                 #self.flLstResults.()
             #self.table.update(id_n, (get_row[1], get_row[2], get_row[3], get_row[4]))
@@ -524,21 +585,33 @@ class MainApplication(tk.Frame):
 
     def buttonCANSendClick(self):
         if self.is_connect == 1:
+            id_m = int(self.textID.get(), 16)
+            len_m = int(self.textLen.get())
+            data1 = int(self.textData1.get(), 16)
+            data2 = int(self.textData2.get(), 16)
+            data3 = int(self.textData3.get(), 16)
+            data4 = int(self.textData4.get(), 16)
+            data5 = int(self.textData5.get(), 16)
+            data6 = int(self.textData6.get(), 16)
+            data7 = int(self.textData7.get(), 16)
+            data8 = int(self.textData8.get(), 16)
+            cycle_m = int(self.textCycle.get())
             mess = []
-            mess.append(0x18555503)
-            mess.append(8)
-            mess.append([0x15, 0x15, 0x15, 0x15, 0x15, 0x15, 0x15, 0x15])
+            mess.append(id_m)
+            mess.append(len_m)
+            mess.append([data1, data2, data3, data4, data5, data6, data7, data8])
             mess.append(1)
             mess.append(0)
-            res = self.SendMsg(mess)
+            res = self.SendMsg(mess, timeout=cycle_m)
             self.resLabel.configure(text=("Result: " + str(res)))
+            self.master.after(cycle_m, self.buttonCANSendClick)
         else:
             pass
         return
 
     def SendMsg(self, msg, timeout=None):
         canmsg = CANTypeDefs.CMSG()
-        canmsg.l_id = msg[0]
+        canmsg.l_id = int(msg[0])
         canmsg.by_len = msg[1]
         bytedata = bytearray(msg[2])
         canmsg.aby_data[:] = bytedata
@@ -547,8 +620,7 @@ class MainApplication(tk.Frame):
 
         result = self.sieca_lib.canSend(self.siecaLibHandle, canmsg, 1)
         if result == 0:
-            #goodmessage
-            pass
+            return
         else:
             #badmessage
             pass
@@ -564,6 +636,50 @@ class MainApplication(tk.Frame):
         #self.flLstResults.insert(tk.END, CANTypeDefs.ReturnValues(l_retval))
         #self.flLstResults.delete(0, tk.END)
         return
+
+    def keyEvent1(self, event):
+        if len(self.textData1.get()) > 2:
+            self.textData1.delete(0, tk.END)
+
+    def keyEvent2(self, event):
+        if len(self.textData2.get()) > 2:
+            self.textData2.delete(0, tk.END)
+
+    def keyEvent3(self, event):
+        if len(self.textData3.get()) > 2:
+            self.textData3.delete(0, tk.END)
+
+    def keyEvent4(self, event):
+        if len(self.textData4.get()) > 2:
+            self.textData4.delete(0, tk.END)
+
+    def keyEvent5(self, event):
+        if len(self.textData5.get()) > 2:
+            self.textData5.delete(0, tk.END)
+
+    def keyEvent6(self, event):
+        if len(self.textData6.get()) > 2:
+            self.textData6.delete(0, tk.END)
+
+    def keyEvent7(self, event):
+        if len(self.textData7.get()) > 2:
+            self.textData7.delete(0, tk.END)
+
+    def keyEvent8(self, event):
+        if len(self.textData8.get()) > 2:
+            self.textData8.delete(0, tk.END)
+
+    def keyEventID(self, event):
+        if len(self.textID.get()) > 8:
+            self.textID.delete(0, tk.END)
+
+    def keyEventLen(self, event):
+        if len(self.textLen.get()) > 1:
+            self.textLen.delete(0, tk.END)
+
+    def keyEventCycle(self, event):
+        if len(self.textCycle.get()) > 5:
+            self.textCycle.delete(0, tk.END)
 
 def WinMain():
     root = tk.Tk()
