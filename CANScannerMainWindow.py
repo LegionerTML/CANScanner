@@ -6,6 +6,7 @@ import CANTypeDefs
 import tkinter.ttk as ttk
 import os
 import threading
+import time
 
 #if platform.architecture()[0] == '32bit':
 from sieca132_client_x32 import sieca132_client
@@ -40,6 +41,90 @@ def view_event_scroll(event):
         if view_p == 0:
             view_p = 1
             yview_listbox = tk.END
+
+class threadRead(threading.Thread):
+    def __init__(self, handle, lib):
+        threading.Thread.__init__(self)
+        self.Canhandle = handle
+        self.sieca_lib = lib
+        self.data = RxData
+        self.still_alive = 1
+        self.desc = DescID
+
+    def run(self):
+        self.reading_proc()
+
+    def reading_proc(self):
+        while self.still_alive:
+            d_retval = self.sieca_lib.canRead(self.Canhandle)
+            for item in range(0, d_retval["l_len"].value):
+                msg1 = d_retval["canmsg"][item]
+            s_data = []
+            int_id = self.tabify(self.shortHEX(msg1.l_id, 0), mode=1, tabsize=10)
+            for y in range(0, msg1.by_len):
+                s_data += self.tabify(self.shortHEX(msg1.aby_data[y], 1))
+            flagF, id_n, num = self.data.find(int_id)
+            if flagF is False:
+                if msg1.l_id != 0:
+                    find_flag, sender, reader = self.desc.find(int_id)
+                    row = [int_id, s_data, msg1.by_len, 1, sender, reader]
+                    self.data.add(row)
+                    # запись логов в файл
+                    # with open(self.main_path + 'log.txt', 'a') as file:
+                    #    file.write("%s\n" % (str(datetime.datetime.now() - self.starttime) + " " + str(row[0]) + " " + row[1] + " " + str(row[2])))
+            else:
+                self.data.update(num, s_data, msg1.by_len)
+                # запись логов в файл
+                # with open(self.main_path + 'log.txt', 'a') as file:
+                #   file.write("%s\n" % (str(datetime.datetime.now() - self.starttime) + " " + str(int_id) + " " + s_data + " " + str(msg1.by_len)))
+        return
+
+    def shortHEX(self, str1, num):
+        ret = ""
+        buff = str(hex(str1))
+        if len(buff[2:]) <= num:
+            ret += "0"
+            ret += buff[2:]
+        else:
+            ret += buff[2:]
+        return ret
+
+    def tabify(self, s, mode=0,tabsize=4):
+        if mode == 0:
+            ln = int((len(s) / tabsize) + 1) * tabsize
+        else:
+            s = s.ljust(tabsize)
+            s += "|  "
+            return s
+        return s.ljust(ln)
+
+    def get_pack(self):
+        return self.data.getall()
+
+    def stapth(self):
+        self.still_alive = 0
+
+class threadSend(threading.Thread):
+    def __init__(self, handle, msg, lib, timeout):
+        threading.Thread.__init__(self)
+        self.CANhandle = handle
+        self.msg = msg
+        self.timeout = timeout/1000
+        self.sieca_lib = lib
+        self.still_alive = 1
+    def run(self):
+        self.proc()
+
+    def proc(self):
+        while self.still_alive:
+            result = self.sieca_lib.canSend(self.CANhandle, self.msg, 1)
+            if result != 0:
+                self.still_alive = 0
+            else:
+                time.sleep(self.timeout)
+
+    def stapth(self):
+        self.still_alive = 0
 
 class DescID:
     def __init__(self):
@@ -219,14 +304,9 @@ class MainApplication(tk.Frame):
         self.counter1 = 0
         self.data = RxData()
         self.desc = DescID()
+        self.is_sending = False
+        self.is_reading = False
         self.init_window()
-        self.id1 = []
-
-
-    def __add_log_msg__(self, message):
-        self.flLstResults.insert(tk.END, "[" + datetime.datetime.now().strftime("%H:%M:%S")+"] " + message)
-        self.flLstResults.yview(tk.END)
-        return
 
     def tabify(self, s, mode=0,tabsize=4):
         if mode == 0:
@@ -389,26 +469,6 @@ class MainApplication(tk.Frame):
         self.pack(fill=tk.BOTH, expand=tk.YES)
         self.master.mainloop()
 
-    def buttonAddClick(self):
-        #add and update row in the table
-        '''id = self.table.add((9, 8, 7, 6))
-        self.table.update(id, (3, 4, 9, 8))
-        i1, i2, i3, i4 = self.table.check(id)'''
-        row1 = [1, 1, [1, 2, 3, 4, 5, 6, 7, 8], 1, 1]
-        row2 = [2, 2, 2, 2, 2]
-        row3 = [3, 3, 3, 3, 3]
-        row4 = [4, 2, 4, 4, 3]
-        in1 = self.data.add(row1)
-        in2 = self.data.add(row2)
-        in3 = self.data.add(row3)
-        in4 = self.data.add(row4)
-        list = self.data.get()
-        self.__add_log_msg__(str(in3) + " " + str(row2[1]) + " " + str(row3[1]) + " " + str(row4[1]))
-        for i in range(len(list)):
-            self.__add_log_msg__(str(list[i]))
-
-        return
-
     def saveLogScript(self):
         #сохранение логов
         #индикация/сообщение
@@ -421,10 +481,31 @@ class MainApplication(tk.Frame):
             self.yview_listbox = '0'
 
     def check_my_msg(self):
-        #i = 0
-        #while i<30:
-        d_retval = self.sieca_lib.canRead(self.siecaLibHandle)
-
+        self.counter1 += 1
+        w = self.master.geometry()
+        if self.counter1 >= 80:
+            self.counter1 = 0
+            data = self.reading.get_pack()
+            self.listDesc.delete(0, tk.END)
+            self.flLstResults.delete(0, tk.END)
+            self.listDesc.insert(tk.END,
+                                u"   ID     |     Отправитель     |   Приемник   | Count")
+            self.listDesc.insert(tk.END,
+                                 "----------+---------------------+--------------+------")
+            self.flLstResults.insert(tk.END, u"   ID     |              Данные              |     | Count")
+            self.flLstResults.insert(tk.END, "----------+----------------------------------+-----+------")
+            for i in range(0, len(data)):
+                self.listDesc.insert(tk.END,
+                                    str(data[i][0]) + data[i][4] + data[i][5] + "  |  " + str(data[i][3]))
+                self.flLstResults.insert(tk.END, str(data[i][0]) + data[i][1] + "|  " + str(
+                    data[i][2]) + "  |  " + str(data[i][3]))
+            self.listDesc.yview(yview_listbox)
+            self.flLstResults.yview(yview_listbox)
+        if self.is_connect == 1:
+            self.master.after(1, self.check_my_msg)
+        else:
+            return
+        '''d_retval = self.sieca_lib.canRead(self.siecaLibHandle)
         for item in range(0, d_retval["l_len"].value):
             msg1 = d_retval["canmsg"][item]
         # msg2 = d_retval["canmsg"][0]
@@ -491,14 +572,10 @@ class MainApplication(tk.Frame):
 
 
         #self.flLstResults.delete(0, tk.END)
-
-        '''list_s = self.data.getall()
-        for i in range(len(list_s)):
-            self.__add_log_msg__(str(list_s[i]))'''
         if self.is_connect == 1:
             self.master.after(1, self.check_my_msg)
         else:
-            return
+            return'''
 
     def shortHEX(self, str1, num):
         ret = ""
@@ -513,7 +590,11 @@ class MainApplication(tk.Frame):
     def buttonReadClick(self):
         if self.is_connect == 1:
             self.starttime = datetime.datetime.now()
-            self.check_my_msg()
+            self.reading = threadRead(self.siecaLibHandle, self.sieca_lib)
+            self.reading.start()
+            self.is_reading = self.reading.is_alive()
+            if self.is_reading is True:
+                self.check_my_msg()
         else:
             pass
         return
@@ -548,91 +629,54 @@ class MainApplication(tk.Frame):
         else:
             #message
             pass
-        # siecaDllInfo = CANTypeDefs.st_InternalDLLInformation()
-        # res = self.sieca_lib.canGetDllInfo(ctypes.addressof(siecaDllInfo))
-        #self.flLstResults.insert(tk.END, "sieca_lib: " + str(self.sieca_lib))
-        # self.flLstResults.insert(tk.END, CANTypeDefs.ReturnValues(res))
-        # self.flLstResults.insert(tk.END, siecaDllInfo.aui_TxCounter)
-        #self.flLstResults.insert(tk.END, "Set Baudrate: " + str(CANTypeDefs.ReturnValues(l_retval)))
-        #self.flLstResults.insert(tk.END, "LED flashing settings applied: " + str(CANTypeDefs.ReturnValues(l_retval)))
-        #self.flLstResults.insert(tk.END, "CanIsNetOwner: " + str(CANTypeDefs.ReturnValues(l_retval)))
-        #self.flLstResults.insert(tk.END, "CanSetFilterMode: " + str(CANTypeDefs.ReturnValues(l_retval)))
-        #message_reader = ThreadCANMsgReader(self.siecaLibHandle, self.sieca_lib, self.QueueIncomingMessages)
-        #message_reader.start()
-        # d_retval = self.sieca_lib.canRead(self.siecaLibHandle)
-        # self.flLstResults.insert(tk.END, "DataCount: " + str(d_retval["l_len"]))
-        # self.flLstResults.insert(tk.END, "DataCount: " + str(CANTypeDefs.ReturnValues(d_retval["l_retval"])))
-        '''d_retval = self.sieca_lib.canRead(self.canfox_handle)
-        for item in range(0, d_retval["l_len"].value):
-            self.queue.put(d_retval["canmsg"][item])
-        i = 0
-        while i < 10:
-            d_retval = self.sieca_lib.canRead(self.siecaLibHandle)
-
-
-            for item in range(0, d_retval["l_len"].value):
-                msg1 = d_retval["canmsg"][item]
-            #msg2 = d_retval["canmsg"][0]
-            s_data = ""
-            #s_data = msg1.aby_data
-            for y in range(0, msg1.by_len):
-                s_data += str(hex(msg1.aby_data[y])) + " "
-            self.__add_log_msg__("[" + str(hex(msg1.l_id)) + "] Data = " + s_data + "; Len = " + str(msg1.by_len) + "; Ext: " + str(msg1.by_extended) + ";")
-            i += 1'''
-        # self.process_queue()
-
         return
 
     def buttonCANSendClick(self):
-        if self.is_connect == 1:
-            id_m = int(self.textID.get(), 16)
-            len_m = int(self.textLen.get())
-            data1 = int(self.textData1.get(), 16)
-            data2 = int(self.textData2.get(), 16)
-            data3 = int(self.textData3.get(), 16)
-            data4 = int(self.textData4.get(), 16)
-            data5 = int(self.textData5.get(), 16)
-            data6 = int(self.textData6.get(), 16)
-            data7 = int(self.textData7.get(), 16)
-            data8 = int(self.textData8.get(), 16)
-            cycle_m = int(self.textCycle.get())
-            mess = []
-            mess.append(id_m)
-            mess.append(len_m)
-            mess.append([data1, data2, data3, data4, data5, data6, data7, data8])
-            mess.append(1)
-            mess.append(0)
-            res = self.SendMsg(mess, timeout=cycle_m)
-            self.resLabel.configure(text=("Result: " + str(res)))
-            self.master.after(cycle_m, self.buttonCANSendClick)
+        id_m = int(self.textID.get(), 16)
+        len_m = int(self.textLen.get())
+        data1 = int(self.textData1.get(), 16)
+        data2 = int(self.textData2.get(), 16)
+        data3 = int(self.textData3.get(), 16)
+        data4 = int(self.textData4.get(), 16)
+        data5 = int(self.textData5.get(), 16)
+        data6 = int(self.textData6.get(), 16)
+        data7 = int(self.textData7.get(), 16)
+        data8 = int(self.textData8.get(), 16)
+        cycle_m = int(self.textCycle.get())
+        canmsg = CANTypeDefs.CMSG()
+        canmsg.l_id = id_m
+        canmsg.by_len = len_m
+        bytedata = bytearray([data1, data2, data3, data4, data5, data6, data7, data8])
+        canmsg.aby_data[:] = bytedata
+        canmsg.by_extended = 1
+        canmsg.by_remote = 0
+        if self.is_sending is False:
+            self.sending = threadSend(self.siecaLibHandle, canmsg, self.sieca_lib, cycle_m)
+            self.sending.start()
+            self.is_sending = self.sending.is_alive()
+            if self.is_sending is True:
+                self.buttonCanSend.configure(text=r"Stop", relief=tk.SUNKEN)
         else:
-            pass
+            self.sending.stapth()
+            self.sending.join()
+            self.is_sending = self.sending.is_alive()
+            if self.is_sending is False:
+                self.buttonCanSend.configure(text=r"Send", relief=tk.RAISED)
         return
 
-    def SendMsg(self, msg, timeout=None):
-        canmsg = CANTypeDefs.CMSG()
-        canmsg.l_id = int(msg[0])
-        canmsg.by_len = msg[1]
-        bytedata = bytearray(msg[2])
-        canmsg.aby_data[:] = bytedata
-        canmsg.by_extended = msg[3]
-        canmsg.by_remote = msg[4]
-
-        result = self.sieca_lib.canSend(self.siecaLibHandle, canmsg, 1)
-        if result == 0:
-            return
-        else:
-            #badmessage
-            pass
-        return result
 
     def buttonDisconnectClick(self):
         if self.is_connect == 1:
-            l_retval = self.sieca_lib.canClose(self.siecaLibHandle)
-            if l_retval == 0:
-                self.is_connect = 0
-                global view_p
-                view_p = 2
+            if self.is_reading is True:
+                self.reading.stapth()
+                self.reading.join()
+                self.is_reading = self.reading.is_alive()
+                if self.is_reading is False:
+                    l_retval = self.sieca_lib.canClose(self.siecaLibHandle)
+                    if l_retval == 0:
+                        self.is_connect = 0
+                        global view_p
+                        view_p = 2
         #self.flLstResults.insert(tk.END, CANTypeDefs.ReturnValues(l_retval))
         #self.flLstResults.delete(0, tk.END)
         return
