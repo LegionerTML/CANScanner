@@ -47,9 +47,9 @@ class threadRead(threading.Thread):
         threading.Thread.__init__(self)
         self.Canhandle = handle
         self.sieca_lib = lib
-        self.data = RxData
+        self.data = RxData()
         self.still_alive = 1
-        self.desc = DescID
+        self.desc = DescID()
 
     def run(self):
         self.reading_proc()
@@ -59,7 +59,7 @@ class threadRead(threading.Thread):
             d_retval = self.sieca_lib.canRead(self.Canhandle)
             for item in range(0, d_retval["l_len"].value):
                 msg1 = d_retval["canmsg"][item]
-            s_data = []
+            s_data = ""
             int_id = self.tabify(self.shortHEX(msg1.l_id, 0), mode=1, tabsize=10)
             for y in range(0, msg1.by_len):
                 s_data += self.tabify(self.shortHEX(msg1.aby_data[y], 1))
@@ -495,10 +495,8 @@ class MainApplication(tk.Frame):
             self.flLstResults.insert(tk.END, u"   ID     |              Данные              |     | Count")
             self.flLstResults.insert(tk.END, "----------+----------------------------------+-----+------")
             for i in range(0, len(data)):
-                self.listDesc.insert(tk.END,
-                                    str(data[i][0]) + data[i][4] + data[i][5] + "  |  " + str(data[i][3]))
-                self.flLstResults.insert(tk.END, str(data[i][0]) + data[i][1] + "|  " + str(
-                    data[i][2]) + "  |  " + str(data[i][3]))
+                self.listDesc.insert(tk.END, str(data[i][0]) + data[i][4] + data[i][5] + "  |  " + str(data[i][3]))
+                self.flLstResults.insert(tk.END, str(data[i][0]) + data[i][1] + "|  " + str(data[i][2]) + "  |  " + str(data[i][3]))
             self.listDesc.yview(yview_listbox)
             self.flLstResults.yview(yview_listbox)
         if self.is_connect == 1:
