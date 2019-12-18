@@ -43,13 +43,16 @@ def view_event_scroll(event):
             yview_listbox = tk.END
 
 class threadRead(threading.Thread):
-    def __init__(self, handle, lib):
+    def __init__(self, handle, lib, time):
         threading.Thread.__init__(self)
         self.Canhandle = handle
         self.sieca_lib = lib
         self.data = RxData()
         self.still_alive = 1
+        self.is_logging = False
         self.desc = DescID()
+        self.start_time = time
+        self.main_path = os.path.dirname(os.path.realpath(__file__))
 
     def run(self):
         self.reading_proc()
@@ -64,14 +67,15 @@ class threadRead(threading.Thread):
             for y in range(0, msg1.by_len):
                 s_data += self.tabify(self.shortHEX(msg1.aby_data[y], 1))
             flagF, id_n, num = self.data.find(int_id)
+            if self.is_logging is True:
+                with open(self.main_path + '/log.txt', 'a') as file:
+                    file.write("%s\n" % (str(datetime.datetime.now() - self.start_time) + " " + str(int_id) + " " +
+                                  s_data + " " + str(msg1.by_len)))
             if flagF is False:
                 if msg1.l_id != 0:
                     find_flag, sender, reader = self.desc.find(int_id)
                     row = [int_id, s_data, msg1.by_len, 1, sender, reader]
                     self.data.add(row)
-                    # запись логов в файл
-                    # with open(self.main_path + 'log.txt', 'a') as file:
-                    #    file.write("%s\n" % (str(datetime.datetime.now() - self.starttime) + " " + str(row[0]) + " " + row[1] + " " + str(row[2])))
             else:
                 self.data.update(num, s_data, msg1.by_len)
                 # запись логов в файл
@@ -98,8 +102,14 @@ class threadRead(threading.Thread):
             return s
         return s.ljust(ln)
 
+    def reset(self):
+        self.data.clear()
+
     def get_pack(self):
         return self.data.getall()
+
+    def get_log(self, state):
+        self.is_logging = state
 
     def stapth(self):
         self.still_alive = 0
@@ -306,6 +316,7 @@ class MainApplication(tk.Frame):
         self.desc = DescID()
         self.is_sending = False
         self.is_reading = False
+        self.is_logging = False
         self.init_window()
 
     def tabify(self, s, mode=0,tabsize=4):
@@ -328,17 +339,18 @@ class MainApplication(tk.Frame):
         self.master.geometry(str(defaultMainWindowSizeX) + "x" + str(defaultMainWindowSizeY))
 
         self.frame1 = tk.Frame(self.master, bd=1, relief=tk.RAISED)
-        tkMenu = Menu(self.frame1)
-        self.master.config(menu=tkMenu)
+        self.tkMenu = Menu(self.frame1)
+        self.master.config(menu=self.tkMenu)
 
-        tkMenuConnection = Menu(tkMenu, tearoff=0)
-        tkMenuAction = Menu(tkMenu, tearoff=0)
-        tkMenu.add_cascade(label="Connection", menu=tkMenuConnection)
-        tkMenu.add_cascade(label="Action", menu=tkMenuAction)
-        tkMenuConnection.add_command(label="Connect", command=lambda: self.buttonConnectClick())
-        tkMenuConnection.add_command(label="Disconnect", command=lambda: self.buttonDisconnectClick())
-        tkMenuAction.add_command(label="Read", command=lambda: self.buttonReadClick())
-        tkMenuAction.add_command(label="Save log", command=lambda: self.saveLogScript())
+        self.tkMenuConnection = Menu(self.tkMenu, tearoff=0)
+        self.tkMenuAction = Menu(self.tkMenu, tearoff=0)
+        self.tkMenu.add_cascade(label="Connection", menu=self.tkMenuConnection)
+        self.tkMenu.add_cascade(label="Action", menu=self.tkMenuAction)
+        self.tkMenuConnection.add_command(label="Connect", command=lambda: self.buttonConnectClick())
+        self.tkMenuConnection.add_command(label="Disconnect", command=lambda: self.buttonDisconnectClick())
+        self.tkMenuAction.add_command(label="Read", command=lambda: self.buttonReadClick())
+        self.tkMenuAction.add_command(label="Save log", command=lambda: self.saveLogScript())
+        self.tkMenuAction.add_command(label="Reset", command=lambda: self.buttonReset())
         #tkLab = tk.Radiobutton(text='Disconnected', value=0)
         #tkMenu.add_command(label='Disconnected')
         #self.table = Table(self.master, headings=('ID', 'Data', 'Len', 'Count'))
@@ -470,9 +482,16 @@ class MainApplication(tk.Frame):
         self.master.mainloop()
 
     def saveLogScript(self):
+        if self.is_logging is False and self.is_reading is True:
+            self.is_logging = True
+            self.reading.get_log(self.is_logging)
+            self.tkMenuAction.entryconfig(1, label=" log")
+        else:
+            self.is_logging = False
+            self.reading.get_log(self.is_logging)
+            self.tkMenuAction.entryconfig(1, label="Save log")
         #сохранение логов
         #индикация/сообщение
-        return
 
     def scrollM(self):
         if self.view_p == 0:
@@ -587,47 +606,53 @@ class MainApplication(tk.Frame):
 
     def buttonReadClick(self):
         if self.is_connect == 1:
-            self.starttime = datetime.datetime.now()
-            self.reading = threadRead(self.siecaLibHandle, self.sieca_lib)
-            self.reading.start()
-            self.is_reading = self.reading.is_alive()
-            if self.is_reading is True:
-                self.check_my_msg()
-        else:
-            pass
+            if self.is_reading is False:
+                self.starttime = datetime.datetime.now()
+                self.reading = threadRead(self.siecaLibHandle, self.sieca_lib, self.starttime)
+                self.reading.start()
+                self.is_reading = self.reading.is_alive()
+                if self.is_reading is True:
+                    self.check_my_msg()
         return
+
+    def buttonReset(self):
+        if self.is_connect == 1:
+            if self.is_reading is True:
+                self.reading.reset()
 
     def buttonConnectClick(self):
-        self.sieca_lib = sieca132_client()
+        if self.is_connect == 0:
+            self.sieca_lib = sieca132_client()
 
-        l_netnumber = 105
-        l_txtimeout = -1
-        l_rxtimeout = -1
+            l_netnumber = 105
+            l_txtimeout = -1
+            l_rxtimeout = -1
 
-        c_canAppName = "canAppName"
-        c_ReceiverEventName = "RE1"
-        c_ErrorEventName = "EE1"
+            c_canAppName = "canAppName"
+            c_ReceiverEventName = "RE1"
+            c_ErrorEventName = "EE1"
 
-        d_retval = self.sieca_lib.canOpen(l_netnumber, 0, 0, l_txtimeout, l_rxtimeout, c_canAppName,
-                                          c_ReceiverEventName, c_ErrorEventName)
-        if d_retval["l_retval"] == 0:
-            self.is_connect = 1
-            self.siecaLibHandle = d_retval["handle"]
-            l_retval = self.sieca_lib.canSetBaudrate(self.siecaLibHandle,
+            d_retval = self.sieca_lib.canOpen(l_netnumber, 0, 0, l_txtimeout, l_rxtimeout, c_canAppName,
+                                              c_ReceiverEventName, c_ErrorEventName)
+            if d_retval["l_retval"] == 0:
+                self.is_connect = 1
+                self.siecaLibHandle = d_retval["handle"]
+                l_retval = self.sieca_lib.canSetBaudrate(self.siecaLibHandle,
                                                     int(CANTypeDefs.Baudrate.BAUD_250))  # 250 kbits/sec
-            if l_retval == 0:
-                l_retval = self.sieca_lib.canBlinkLED(self.siecaLibHandle, 0, 0b111, 0b101)
                 if l_retval == 0:
-                    l_retval = self.sieca_lib.canIsNetOwner(d_retval["handle"])
+                    l_retval = self.sieca_lib.canBlinkLED(self.siecaLibHandle, 0, 0b111, 0b101)
                     if l_retval == 0:
-                        l_retval = self.sieca_lib.canSetFilterMode(self.siecaLibHandle, CANTypeDefs.T_FILTER_MODE.filterMode_nofilter)
+                        l_retval = self.sieca_lib.canIsNetOwner(d_retval["handle"])
                         if l_retval == 0:
-                            global view_p
-                            view_p = 0
+                            l_retval = self.sieca_lib.canSetFilterMode(self.siecaLibHandle, CANTypeDefs.T_FILTER_MODE.filterMode_nofilter)
+                            if l_retval == 0:
+                                global view_p
+                                view_p = 0
+            else:
+                #message
+                pass
         else:
-            #message
             pass
-        return
 
     def buttonCANSendClick(self):
         id_m = int(self.textID.get(), 16)
@@ -669,12 +694,19 @@ class MainApplication(tk.Frame):
                 self.reading.stapth()
                 self.reading.join()
                 self.is_reading = self.reading.is_alive()
-                if self.is_reading is False:
-                    l_retval = self.sieca_lib.canClose(self.siecaLibHandle)
-                    if l_retval == 0:
-                        self.is_connect = 0
-                        global view_p
-                        view_p = 2
+                if self.is_reading is True:
+                    return
+            if self.is_sending is True:
+                self.sending.stapth()
+                self.sending.join()
+                self.is_sending = self.sending.is_alive()
+                if self.is_sending is True:
+                    return
+            l_retval = self.sieca_lib.canClose(self.siecaLibHandle)
+            if l_retval == 0:
+                self.is_connect = 0
+                global view_p
+                view_p = 2
         #self.flLstResults.insert(tk.END, CANTypeDefs.ReturnValues(l_retval))
         #self.flLstResults.delete(0, tk.END)
         return
