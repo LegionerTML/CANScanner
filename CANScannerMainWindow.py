@@ -20,8 +20,9 @@ yview_listbox = '0'
 
 
 def openDescriptionEvent(event):
-    root = tk.Tk()
-    app1 = DescApplication(root)
+    pass
+    #root = tk.Tk()
+    #app1 = DescApplication(root)
 
 def view_event_up(event):
     global yview_listbox, view_p
@@ -427,7 +428,7 @@ class MainApplication(tk.Frame):
             self.textCycleArr[i].insert(tk.INSERT, "500")
             self.textCycleArr[i].bind('<KeyRelease>', self.keyEventCycle)
             self.checkbtnSendArr[i].grid(row=i, column=0, columnspan=4, sticky=tk.N + tk.W, padx=0, pady=2)
-            #self.checkbtnSendArr[i].bind('<B1>', self.check_click)
+            #self.checkbtnSendArr[i].bind('<ButtonRelease-1>', self.check_click)
             self.idLabelArr[i].grid(row=i, column=4, sticky=tk.N + tk.W, padx=0, pady=4)
             self.dataLabelArr[i].grid(row=i, column=8, sticky=tk.N + tk.W, padx=0, pady=4)
             self.cycleLabelArr[i].grid(row=i, column=17, sticky=tk.N + tk.W, padx=0, pady=4)
@@ -451,7 +452,7 @@ class MainApplication(tk.Frame):
 
         self.listDesc = tk.Listbox(tabDesc, font='Courier')
         self.listDesc.pack(expand=tk.YES, fill=tk.BOTH)
-        self.listDesc.bind("<Double-Button-1>", openDescriptionEvent)
+        #self.listDesc.bind("<Double-Button-1>", openDescriptionEvent)
 
         self.flLstResults = tk.Listbox(tabReading, font='Courier')
         #scrollbarF1 = tk.Scrollbar(tabReading, command=self.flLstResults.yview, orient=tk.VERTICAL)
@@ -461,7 +462,7 @@ class MainApplication(tk.Frame):
         self.listDesc.configure(xscrollcommand=scrollbar.set)
         scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
         self.flLstResults.pack(expand=tk.YES, fill=tk.BOTH)
-        self.flLstResults.bind("<Double-Button-1>", openDescriptionEvent)
+        #self.flLstResults.bind("<Double-Button-1>", openDescriptionEvent)
 
 
         #self.__add_log_msg__("self.frameLog.grid(row=2, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=5, pady=5)")
@@ -754,8 +755,15 @@ class MainApplication(tk.Frame):
         if len(event.widget.get()) > 5:
             event.widget.delete(0, tk.END)
 
-    def check_click(self):
-        pass
+    def check_click(self, event):
+        counter_sel_all1 = 0
+        for i in range(10):
+            if self.solomess[i].get() is True:
+                counter_sel_all1 += 1
+        if counter_sel_all1 == 10:
+            self.checkbtnSelAll.select()
+        else:
+            self.checkbtnSelAll.deselect()
 
 def WinMain():
     root = tk.Tk()
