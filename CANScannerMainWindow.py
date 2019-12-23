@@ -55,6 +55,7 @@ class threadRead(threading.Thread):
         self.desc = DescID()
         self.start_time = time
         self.main_path = os.path.dirname(os.path.realpath(__file__))
+        self.file = 0
         with open(self.main_path + '/log.txt', 'w'):
             pass
 
@@ -72,9 +73,11 @@ class threadRead(threading.Thread):
                 s_data += self.tabify(self.shortHEX(msg1.aby_data[y], 1))
             flagF, id_n, num = self.data.find(int_id)
             if self.is_logging is True:
-                with open(self.main_path + '/log.txt', 'a') as file:
-                    file.write("%s\n" % (str(datetime.datetime.now() - self.start_time) + " " + str(int_id) + " " +
-                                  s_data + " " + str(msg1.by_len)))
+                try:
+                    self.file.write("%s\n" % (str(datetime.datetime.now() - self.start_time) + " " + int_id + " " +
+                                    s_data + " " + str(msg1.by_len)))
+                except Exception:
+                    self.file = open(self.main_path + '/log.txt', 'a')
             if flagF is False:
                 if msg1.l_id != 0:
                     find_flag, sender, reader = self.desc.find(int_id)
@@ -114,6 +117,10 @@ class threadRead(threading.Thread):
 
     def get_log(self, state):
         self.is_logging = state
+        if self.is_logging is True:
+            self.file = open(self.main_path + '/log.txt', 'a')
+        else:
+            self.file.close()
 
     def stapth(self):
         self.still_alive = 0
