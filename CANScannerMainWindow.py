@@ -1,17 +1,13 @@
 import tkinter as tk
 from tkinter import ttk, Menu, filedialog, messagebox
 import datetime
-import platform
 import CANTypeDefs
 import tkinter.ttk as ttk
 import os
 import threading
 import time
 
-#if platform.architecture()[0] == '32bit':
 from sieca132_client_x32 import sieca132_client
-#else:
-#   from sieca132_client_x64 import sieca132_client
 
 view_p = 2
 yview_listbox = '0'
@@ -85,9 +81,6 @@ class threadRead(threading.Thread):
                     self.data.add(row)
             else:
                 self.data.update(num, s_data, msg1.by_len)
-                # запись логов в файл
-                # with open(self.main_path + 'log.txt', 'a') as file:
-                #   file.write("%s\n" % (str(datetime.datetime.now() - self.starttime) + " " + str(int_id) + " " + s_data + " " + str(msg1.by_len)))
         return
 
     def shortHEX(self, str1, num):
@@ -229,8 +222,6 @@ class RxData:
         self.list1 = []
 
     def add(self, row):
-        #index = self.list1.index(row[1])
-        #a = str(row[0])
         ret, id_n, ii = self.find(row[0])
         if ret is True:
             self.update(ii, row[1], row[2])
@@ -277,8 +268,7 @@ class DescApplication(tk.Frame):
         defaultMainWindowSizeX = 615
         defaultMainWindowSizeY = 580
 
-        # self.main_path = os.path.dirname(os.path.realpath(__file__))
-        self.master.title("CAN Scanner v0.0.1")
+        self.master.title("CAN Scanner v1.0")
         self.master.maxsize(615, 580)
         self.master.minsize(615, 580)
         self.master.geometry(str(defaultMainWindowSizeX) + "x" + str(defaultMainWindowSizeY))
@@ -357,7 +347,6 @@ class MainApplication(tk.Frame):
         defaultMainWindowSizeX = 615
         defaultMainWindowSizeY = 580
 
-        #self.main_path = os.path.dirname(os.path.realpath(__file__))
         self.master.title("CAN Scanner v0.0.1")
         self.master.maxsize(615, 580)
         self.master.minsize(615, 580)
@@ -372,12 +361,9 @@ class MainApplication(tk.Frame):
         self.tkMenu.add_cascade(label="Connection", menu=self.tkMenuConnection)
         self.tkMenuConnection.add_command(label="Connect", command=lambda: self.buttonConnectionClick())
         self.tkMenu.add_cascade(label="Action", menu=self.tkMenuAction)
-        #self.tkMenuConnection.add_command(label="Disconnect", command=lambda: self.buttonDisconnectClick())
         self.tkMenuAction.add_command(label="Read", command=lambda: self.buttonReadClick())
         self.tkMenuAction.add_command(label="Save log", command=lambda: self.saveLogScript())
         self.tkMenuAction.add_command(label="Reset", command=lambda: self.buttonReset())
-        #tkLab = tk.Radiobutton(text='Disconnected', value=0)
-        #tkMenu.add_command(label='Disconnected')
         self.master.bind('<Up>', view_event_up)
         self.master.bind('<Down>', view_event_down)
         self.master.bind('<MouseWheel>', view_event_scroll)
@@ -389,7 +375,6 @@ class MainApplication(tk.Frame):
         tabControl.add(tabReading, text="Reading")
         tabControl.add(tabDesc, text="Description")
         tabControl.add(tabSending, text="Sending")
-        #tabControl.grid(row=0, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=3, pady=3)
         tabControl.pack(expand=tk.YES, fill=tk.BOTH)
         tabControl.rowconfigure(0, weight=1)
         tabControl.columnconfigure(0, weight=1)
@@ -399,20 +384,12 @@ class MainApplication(tk.Frame):
         tabDesc.rowconfigure(0, weight=1)
         tabSending.columnconfigure(0, weight=1)
         tabSending.rowconfigure(0, weight=1)
-        '''self.frameLog = tk.LabelFrame(tabReading, relief=tk.RAISED, borderwidth=1, text="Log")
-        self.frameLog.grid(row=2, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=5, pady=5)
-        self.frameLog.columnconfigure(0, weight=20, pad=3)
-        self.frameLog.columnconfigure(1, weight=1, pad=3)
-        self.frameLog.rowconfigure(0, weight=1, pad=3)'''
 
         sendFrame = tk.Frame(tabSending)
         sendFrameLB = tk.Frame(tabSending)
         sendFrame.pack(expand=tk.YES, fill=tk.X)
         sendFrameLB.pack(expand=tk.YES, fill=tk.BOTH)
-        #sendFrameLB.grid(row=1, column=0, sticky=tk.W + tk.N + tk.E)
-        #sendFrame.grid(row=0, column=0, sticky=tk.W + tk.N + tk.S + tk.E)
         self.sendList = tk.Listbox(sendFrameLB, font='Courier 10')
-        #self.sendList.grid(row=0, column=0, sticky=tk.W + tk.N + tk.S + tk.E)
         self.sendList.pack(expand=tk.YES, fill=tk.BOTH)
         self.textIDArr = [tk.Entry(sendFrame, width=8, font='Courier 8') for i in range(10)]
         self.textDataArr = [[tk.Entry(sendFrame, width=2, font='Courier 8') for j in range(8)] for i in range(10)]
@@ -439,7 +416,6 @@ class MainApplication(tk.Frame):
             self.idLabelArr[i].grid(row=i, column=4, sticky=tk.N + tk.W, padx=0, pady=4)
             self.dataLabelArr[i].grid(row=i, column=8, sticky=tk.N + tk.W, padx=0, pady=4)
             self.cycleLabelArr[i].grid(row=i, column=17, sticky=tk.N + tk.W, padx=0, pady=4)
-        #self.textData.grid(row=0, column=3, sticky=tk.N + tk.W, padx=5, pady=5)
 
         self.checkbtnSelAll = tk.Checkbutton(sendFrame, text="Select all", onvalue=1, offvalue=0, variable=self.is_sel_all, command=self.select_all, state="normal", width=10)
         self.checkbtnSelAll.grid(row=12, column=0, columnspan=4, sticky=tk.N + tk.W, padx=0, pady=2)
@@ -462,24 +438,12 @@ class MainApplication(tk.Frame):
         #self.listDesc.bind("<Double-Button-1>", openDescriptionEvent)
 
         self.flLstResults = tk.Listbox(tabReading, font='Courier')
-        #scrollbarF1 = tk.Scrollbar(tabReading, command=self.flLstResults.yview, orient=tk.VERTICAL)
-        #self.flLstResults.configure(yscrollcommand=scrollbarF1.set)
-        #scrollbarF1.pack(side=tk.RIGHT, fill=tk.Y)
         scrollbar = tk.Scrollbar(tabDesc, command=self.listDesc.xview, orient=tk.HORIZONTAL)
         self.listDesc.configure(xscrollcommand=scrollbar.set)
         scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
         self.flLstResults.pack(expand=tk.YES, fill=tk.BOTH)
         #self.flLstResults.bind("<Double-Button-1>", openDescriptionEvent)
 
-
-        #self.__add_log_msg__("self.frameLog.grid(row=2, column=0, sticky=tk.N + tk.S + tk.W + tk.E, padx=5, pady=5)")
-        #buttonConnect = tk.Button(self.master, state="normal", text=r"Connect", command=self.buttonCANConnectClick)
-        #buttonConnect.grid()
-        #buttonConnect.pack()
-        '''label1 = tk.Label(self.master, text="Button: ")
-        label1.grid(column=10, row=1)
-        label2 = tk.Label(self.master, text="2")
-        label2.grid(column=5, row=5)'''
         self.pack(fill=tk.BOTH, expand=tk.YES)
         self.master.mainloop()
 
@@ -492,8 +456,6 @@ class MainApplication(tk.Frame):
             self.is_logging = False
             self.reading.get_log(self.is_logging)
             self.tkMenuAction.entryconfig(1, label="Save log")
-        #сохранение логов
-        #индикация/сообщение
 
     def scrollM(self):
         if self.view_p == 0:
@@ -672,47 +634,6 @@ class MainApplication(tk.Frame):
                     self.is_sending = False
             else:
                 self.sendList.insert(tk.END, "Connection was not found")
-        '''id_m = int(self.textID.get(), 16)
-        len_m = 8
-        data1 = int(self.textData1.get(), 16)
-        data2 = int(self.textData2.get(), 16)
-        data3 = int(self.textData3.get(), 16)
-        data4 = int(self.textData4.get(), 16)
-        data5 = int(self.textData5.get(), 16)
-        data6 = int(self.textData6.get(), 16)
-        data7 = int(self.textData7.get(), 16)
-        data8 = int(self.textData8.get(), 16)
-        cycle_m = int(self.textCycle.get())
-        canmsg = CANTypeDefs.CMSG()
-        canmsg.l_id = id_m
-        canmsg.by_len = len_m
-        bytedata = bytearray([data1, data2, data3, data4, data5, data6, data7, data8])
-        canmsg.aby_data[:] = bytedata
-        canmsg.by_extended = 1
-        canmsg.by_remote = 0
-        if self.solomess.get() is True:
-            result = self.sieca_lib.canSend(self.siecaLibHandle, canmsg, 1)
-            if result == 0:
-                self.sendList.insert(tk.END, "Message sent.")
-        else:
-            if self.is_sending is False:
-                self.sending = threadSend(self.siecaLibHandle, canmsg, self.sieca_lib, cycle_m)
-                self.sending.start()
-                self.is_sending = self.sending.is_alive()
-                self.sendList.insert(tk.END, "Sending messages: ID - 0x" + self.textID.get())
-                self.sendList.insert(tk.END, "Data - " + self.textData1.get() + " " + self.textData2.get() + " " + self.textData3.get() + " " +
-                                     self.textData4.get() + " " + self.textData5.get() + " " + self.textData6.get() + " " +
-                                     self.textData7.get() + " " + self.textData8.get())
-                self.sendList.insert(tk.END, "Cycle time - " + self.textCycle.get())
-                if self.is_sending is True:
-                    self.buttonCanSend.configure(text=r"Stop", relief=tk.SUNKEN)
-            else:
-                self.sending.stapth()
-                self.sending.join()
-                self.is_sending = self.sending.is_alive()
-                if self.is_sending is False:
-                    self.sendList.insert(tk.END, "Messages are not send")
-                    self.buttonCanSend.configure(text=r"Send", relief=tk.RAISED)'''
         return
 
 
@@ -746,8 +667,6 @@ class MainApplication(tk.Frame):
                 global view_p
                 view_p = 2
                 self.tkMenuConnection.entryconfig(0, label="Connect")
-        #self.flLstResults.insert(tk.END, CANTypeDefs.ReturnValues(l_retval))
-        #self.flLstResults.delete(0, tk.END)
         return
 
     def keyEvent(self, event):
